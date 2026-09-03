@@ -13,23 +13,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout do código
+      - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: ⚙️ Setup do Node.js
+      - name: Setup do Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20' 
           cache: 'npm'
 
-      - name: 📦 Instalar dependências
+      - name: Instalar dependências
         run: npm ci
 
-      - name: 🧹 Check de Lint
+      - name: Check de Lint
         run: npm run lint
 
-      - name: 🏗️ Check de Build
+      - name: Check de Build
         run: npm run build
 
-      - name: 🧪 Check de Testes
-        run: npm run test
+      - name: Check de Testes
+        run: npm run test:coverage

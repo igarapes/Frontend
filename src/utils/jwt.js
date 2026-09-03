@@ -7,6 +7,7 @@ export const decodeJWT = (token) => {
     }).join(''));
     return JSON.parse(jsonPayload);
   } catch (error) {
+    console.log(error.message)
     return null;
   }
 };

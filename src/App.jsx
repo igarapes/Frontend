@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
+import { PrivateRoute } from './components/privateRoutes';
 import { Login } from './pages/Login';
+import { FirstAccess } from './pages/FirstAccess';
 
 function App() {
   return (
@@ -8,8 +11,10 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         
-        <Route path="/primeiro-acesso" element={<div className="p-8 text-center">Tela de Primeiro Acesso em construção...</div>} />
-        <Route path="/dashboard" element={<div className="p-8 text-center">Dashboard Principal</div>} />
+        <Route element={<PrivateRoute/>}>
+          <Route path="/primeiro-acesso" element={<FirstAccess/>} />
+          <Route path="/dashboard" element={<div className="p-8 text-center">Dashboard Principal</div>} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
