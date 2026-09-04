@@ -12,7 +12,7 @@ export function PasswordStrength({ password = '' }) {
   };
 
   return (
-    <div className="mt-2 space-y-3 p-3 bg-gray-50 rounded-md border border-gray-100">
+    <div className="mt-3 space-y-3 p-3 sm:p-4 bg-gray-50 rounded-md border border-gray-100">
       <div className="flex gap-1 h-1.5 w-full rounded-full overflow-hidden bg-gray-200">
         {[1, 2, 3, 4].map((level) => (
           <div
@@ -24,15 +24,15 @@ export function PasswordStrength({ password = '' }) {
         ))}
       </div>
 
-      <ul className="space-y-1 mt-2">
+      <ul className="space-y-1.5 mt-3">
         {results.map((req) => (
-          <li key={req.id} className="flex items-center text-xs">
+          <li key={req.id} className="flex items-start text-xs sm:text-sm">
             {req.met ? (
-              <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mr-1.5 flex-shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
             ) : (
-              <XCircle className="w-3.5 h-3.5 text-gray-400 mr-1.5 flex-shrink-0" />
+              <XCircle className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0 mt-0.5" />
             )}
-            <span className={req.met ? 'text-gray-700' : 'text-gray-500'}>
+            <span className={req.met ? 'text-gray-700 leading-tight' : 'text-gray-500 leading-tight'}>
               {req.label}
             </span>
           </li>
