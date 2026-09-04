@@ -4,11 +4,9 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { Login } from '../../../src/pages/Login';
-import * as authService from '../../../src/services/auth';
-import { decodeJWT } from '../../../src/utils/jwt';
+import { api } from '../../../src/services/api';
 
-vi.mock('../../../src/services/auth');
-vi.mock('../../../src/utils/jwt');
+vi.mock('../../../src/services/api');
 
 describe('Integração: Página de Login', () => {
   beforeEach(() => {
@@ -28,11 +26,15 @@ describe('Integração: Página de Login', () => {
     );
   };
 
-  it('deve realizar login e redirecionar para primeiro acesso se a flag for verdadeira', async () => {
-    const user = userEvent.setup();
+  const generateFakeToken = (payload) => {
+    const base64Payload = btoa(JSON.stringify(payload));
+    return `header.${base64Payload}.signature`;
+  };
 
-    vi.mocked(decodeJWT).mockReturnValue({ primeiro_acesso: true });
-    authService.loginService.mockResolvedValue({ token: 'fake-token' });
+  it('deve realizar login e redirecionar para primeiro acesso', async () => {
+    const user = userEvent.setup();
+    const fakeToken = generateFakeToken({ primeiro_acesso: true });
+    api.post.mockResolvedValue({ data: { token: fakeToken } });
 
     renderComponent();
 
@@ -45,11 +47,10 @@ describe('Integração: Página de Login', () => {
     });
   });
 
-  it('deve realizar login e redirecionar para o dashboard se a flag for falsa', async () => {
+  it('deve realizar login e redirecionar para o dashboard', async () => {
     const user = userEvent.setup();
-
-    vi.mocked(decodeJWT).mockReturnValue({ primeiro_acesso: false });
-    authService.loginService.mockResolvedValue({ token: 'fake-token' });
+    const fakeToken = generateFakeToken({ primeiro_acesso: false });
+    api.post.mockResolvedValue({ data: { token: fakeToken } });
 
     renderComponent();
 
@@ -62,20 +63,18 @@ describe('Integração: Página de Login', () => {
     });
   });
 
-  it('deve desabilitar o botão enquanto a requisição estiver carregando', async () => {
+  it('deve exibir mensagem de erro ao falhar o login', async () => {
     const user = userEvent.setup();
-    
-    authService.loginService.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 500)));
-    vi.mocked(decodeJWT).mockReturnValue({ primeiro_acesso: false });
+    api.post.mockRejectedValue(new Error('Erro na API'));
 
     renderComponent();
 
     await user.type(screen.getByLabelText(/cpf ou email/i), 'teste@teste.com');
     await user.type(screen.getByLabelText(/senha/i), 'Senha123!');
-    
-    const button = screen.getByRole('button', { name: /entrar/i });
-    await user.click(button);
+    await user.click(screen.getByRole('button', { name: /entrar/i }));
 
-    expect(button).toBeDisabled();
+    await waitFor(() => {
+      expect(screen.getByText('Credenciais inválidas. Verifique seus dados e tente novamente.')).toBeInTheDocument();
+    });
   });
 });
