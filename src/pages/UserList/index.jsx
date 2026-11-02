@@ -10,6 +10,7 @@ import { UserTable } from '../../components/UserTable';
 export function UserList() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
   
   const [modalOpen, setModalOpen] = useState(false);
   const [userToInactivate, setUserToInactivate] = useState(null);
@@ -20,20 +21,23 @@ export function UserList() {
   const loggedUserRole = token ? decodeJWT(token)?.role : null;
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    let ignore = false;
 
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get('/user');
-      setUsers(response.data);
-    } catch (error) {
-      alert('Erro ao buscar usuários');
-    } finally {
-      setLoading(false);
-    }
-  };
+    api.get('/user')
+      .then((response) => {
+        if (!ignore) setUsers(response.data);
+      })
+      .catch(() => {
+        if (!ignore) alert('Erro ao buscar usuários');
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [reloadKey]);
 
   const handleEdit = (user) => {
     navigate(`/cadastros/editar/${user.id}`, { state: { user } });
@@ -50,7 +54,8 @@ export function UserList() {
       await api.patch(`/user/${userToInactivate.id}/inactivate`);
       setModalOpen(false);
       setUserToInactivate(null);
-      fetchUsers(); 
+      setLoading(true);
+      setReloadKey((key) => key + 1);
     } catch (error) {
       alert('Erro ao inativar usuário: ' + (error.response?.data?.message || error.message));
     }
